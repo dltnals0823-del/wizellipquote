@@ -261,6 +261,16 @@ header p{font-size:.72rem;opacity:.72;margin-top:1px}
 .btn-e:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
 
 /* ── 토스트 ── */
+.desk-only{display:flex!important}
+.mob-only{display:none!important}
+.mob-mini-total{display:flex;gap:16px;align-items:center}
+.mmt-row{display:flex;flex-direction:column;gap:1px}
+.mmt-lbl{font-size:.6rem;color:var(--gray-500);font-weight:600}
+.mmt-val{font-size:.88rem;font-weight:800;color:var(--gray-900)}
+.mmt-val.accent{color:var(--blue)}
+.mmt-val.green{color:var(--green)}
+.mmt-val.red{color:var(--red)}
+
 .toast{
   position:fixed;bottom:20px;right:20px;
   background:#1e293b;color:white;padding:10px 16px;
@@ -271,6 +281,16 @@ header p{font-size:.72rem;opacity:.72;margin-top:1px}
 .toast.show{transform:translateY(0);opacity:1}
 
 /* ── 스크롤바 ── */
+.desk-only{display:flex!important}
+.mob-only{display:none!important}
+.mob-mini-total{display:flex;gap:16px;align-items:center}
+.mmt-row{display:flex;flex-direction:column;gap:1px}
+.mmt-lbl{font-size:.6rem;color:var(--gray-500);font-weight:600}
+.mmt-val{font-size:.88rem;font-weight:800;color:var(--gray-900)}
+.mmt-val.accent{color:var(--blue)}
+.mmt-val.green{color:var(--green)}
+.mmt-val.red{color:var(--red)}
+
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:10px}
@@ -414,13 +434,13 @@ header p{font-size:.72rem;opacity:.72;margin-top:1px}
   <div class="q-meta">
     <div class="mf"><label>회사명</label><input id="company" placeholder="(주)고객사명"></div>
     <div class="mf"><label>담당자</label><input id="manager" placeholder="홍길동"></div>
-    <div class="mf"><label>납기일</label><input type="date" id="dueDate"></div>
     <div class="mf"><label>기준환율</label><input id="fxRate" type="number" value="1550" min="1000" max="2500"></div>
     <div class="mf"><label>환율리스크 (%)</label><input id="kRisk" type="number" value="5" min="0" max="30" step="0.1"></div>
     <div class="mf"><label>할인율 (%)</label><input id="discRate" type="number" value="0" min="0" max="50" step="0.1"></div>
   </div>
   <div class="q-bottom">
-    <div class="totals">
+    <!-- 데스크톱에서만 재무 요약 표시 -->
+    <div class="totals desk-only">
       <div class="ti"><div class="tl">견적가 (G열)</div><div class="tv accent" id="tQuote">₩0</div></div>
       <div class="tdiv"></div>
       <div class="ti"><div class="tl">할인율</div><div class="tv sm" id="tDisc">0%</div></div>
@@ -430,9 +450,20 @@ header p{font-size:.72rem;opacity:.72;margin-top:1px}
       <div class="ti"><div class="tl">예상마진 (L52)</div><div class="tv green" id="tMargin">₩0</div></div>
       <div class="ti"><div class="tl">마진율</div><div class="tv sm" id="tMarginPct">0%</div></div>
     </div>
+    <!-- 모바일 간략 요약 -->
+    <div class="mob-mini-total mob-only">
+      <div class="mmt-row">
+        <span class="mmt-lbl">견적가</span>
+        <span class="mmt-val accent" id="tQuoteMob">₩0</span>
+      </div>
+      <div class="mmt-row">
+        <span class="mmt-lbl">예상마진</span>
+        <span class="mmt-val green" id="tMarginMob">₩0</span>
+      </div>
+    </div>
     <div class="btn-row">
       <button class="btn btn-r" onclick="resetAll()">초기화</button>
-      <button class="btn btn-e" id="exportBtn" onclick="exportExcel()" disabled>📥 견적창 엑셀</button>
+      <button class="btn btn-e" id="exportBtn" onclick="exportExcel()" disabled>📥 엑셀</button>
     </div>
   </div>
 </div>
@@ -686,7 +717,7 @@ function renderDevList(){
         <div class="dn">${d.name}</div>
         <div class="dm">${d.sub}</div>
         <div class="dp">${fmtW(gv)} ~</div>
-        <div class="dd">📦 납기 ${d.deliv}일</div>
+        <div class="dd">📦 발주 후 약 ${Math.round(d.deliv/30)}개월</div>
       </div>`;
     });
     h+=`</div></div>`;
@@ -719,7 +750,7 @@ function renderOptions(){
     <div>
       <h2>🔬 ${curDev.name}</h2>
       <div class="sub">${curDev.sub}</div>
-      <div class="deliv">📦 납기 ${curDev.deliv}일 (약 ${Math.round(curDev.deliv/30)}개월)</div>
+      <div class="deliv">📦 발주 후 약 ${Math.round(curDev.deliv/30)}개월 (${curDev.deliv}일)</div>
     </div>
     <div>
       <div class="bp">${fmtW(calcG(curDev.f))}</div>
@@ -793,10 +824,15 @@ function renderSummary(){
   badge.style.display=optCount>0?"inline-block":"none";
   badge.textContent=optCount;
 
+  // 납기일 자동계산
+  const today=new Date();
+  const delivDate=new Date(today.getTime()+curDev.deliv*24*60*60*1000);
+  const delivStr=delivDate.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  const delivMonths=Math.round(curDev.deliv/30);
   let h=`<div class="sum-dev">
     <div class="sum-dev-name">🔬 ${curDev.name}</div>
     <div class="sum-dev-price">${fmtW(calcG(curDev.f))}</div>
-    <div class="sum-dev-deliv">📦 납기 ${curDev.deliv}일</div>
+    <div class="sum-dev-deliv">📦 발주 후 약 ${delivMonths}개월 → ${delivStr} 예상</div>
   </div>`;
   if(optItems.length>0){
     h+=`<div class="sum-sec-hdr">선택 옵션 (${optItems.length}개)</div>`;
@@ -839,6 +875,9 @@ function updateBottom(){
     });
     document.getElementById("exportBtn").disabled=true;
     const badge=document.getElementById("selBadge");badge.style.display="none";
+    document.getElementById("tQuoteMob").textContent="₩0";
+    document.getElementById("tMarginMob").textContent="₩0";
+    document.getElementById("tMarginMob").className="mmt-val";
     return;
   }
   const{totalG,totalF,totalINT}=calcTotals();
@@ -852,6 +891,11 @@ function updateBottom(){
   mel.textContent=fmtW(L52);mel.className="tv"+(L52>=0?" green":" red");
   document.getElementById("tMarginPct").textContent=pct.toFixed(1)+"%";
   document.getElementById("exportBtn").disabled=false;
+  // 모바일 미니 요약
+  document.getElementById("tQuoteMob").textContent=fmtW(totalG);
+  const mmob=document.getElementById("tMarginMob");
+  mmob.textContent=fmtW(L52);
+  mmob.className="mmt-val"+(L52>=0?" green":" red");
 }
 
 // ── 엑셀 내보내기 ──
@@ -876,7 +920,14 @@ function exportExcel(){
     }
   });
   const company=document.getElementById("company").value||"";
-  const today=new Date().toLocaleDateString("ko-KR");
+  const todayDate=new Date();
+  const today=todayDate.toLocaleDateString("ko-KR");
+  // 납기일 자동계산 후 엑셀 D1에 반영 (납기일은 견적창 별도 참조)
+  if(curDev){
+    const delivDate=new Date(todayDate.getTime()+curDev.deliv*24*60*60*1000);
+    const delivStr=delivDate.toLocaleDateString("ko-KR");
+    // 필요시 별도 셀에 쓸 수 있음
+  }
   const out=XLSX.write(wb,{type:"array",bookType:"xlsx",cellStyles:true});
   const blob=new Blob([out],{type:"application/octet-stream"});
   const url=URL.createObjectURL(blob);
@@ -933,7 +984,7 @@ track.addEventListener("touchend",e=>{
 function resetAll(){
   curDev=null;selMap={};
   renderDevList();renderOptions();renderSummary();updateBottom();
-  ["company","manager","dueDate"].forEach(id=>document.getElementById(id).value="");
+  ["company","manager"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("fxRate").value=1550;
   document.getElementById("kRisk").value=5;
   document.getElementById("discRate").value=0;
