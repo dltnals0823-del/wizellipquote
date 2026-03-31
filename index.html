@@ -2,229 +2,441 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>J.A. Woollam 견적 시스템</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;background:#eef2f7;color:#1e293b;min-height:100vh}
-header{background:linear-gradient(135deg,#0f2044,#1e4d8c);color:white;padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-header h1{font-size:1rem;font-weight:700;line-height:1.2}
-header p{font-size:.68rem;opacity:.7;margin-top:1px}
+:root{
+  --blue:#1e4d8c;--blue-lt:#dbeafe;--blue-md:#3b82f6;
+  --gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-300:#cbd5e1;
+  --gray-500:#64748b;--gray-700:#334155;--gray-900:#0f172a;
+  --green:#15803d;--red:#dc2626;--purple:#7c3aed;
+  --radius:10px;--shadow:0 1px 6px rgba(0,0,0,.09);--shadow-md:0 3px 12px rgba(0,0,0,.13);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  background:var(--gray-100);color:var(--gray-900);
+  display:flex;flex-direction:column;
+  font-size:14px;line-height:1.5;
+}
 
-/* ── DESKTOP 레이아웃 ── */
-.layout{display:flex;height:calc(100vh - 50px)}
-.sidebar{width:230px;min-width:200px;background:white;border-right:1px solid #d1dae8;display:flex;flex-direction:column;overflow:hidden}
-.step-lbl{background:#f0f4fa;padding:7px 11px;font-size:.64rem;font-weight:800;color:#4a6080;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:5px;flex-shrink:0}
-.step-num{background:#1e4d8c;color:white;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;flex-shrink:0}
-.dev-scroll{overflow-y:auto;flex:1;padding:5px}
-.acc-grp{margin-bottom:2px}
-.acc-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:6px;cursor:pointer;font-size:.74rem;font-weight:700;color:#334155;background:#f8fafc;border:1.5px solid #e8edf5;transition:all .13s;user-select:none}
-.acc-hdr:hover{background:#eff6ff;border-color:#bfdbfe}
-.acc-hdr.open{background:#dbeafe;border-color:#3b82f6;color:#1e4d8c}
-.acc-arr{font-size:.62rem;transition:transform .18s}
+/* ── 헤더 ── */
+header{
+  background:linear-gradient(135deg,#0c1e40,var(--blue));
+  color:white;padding:13px 20px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);flex-shrink:0;
+}
+header h1{font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+header p{font-size:.72rem;opacity:.72;margin-top:1px}
+
+/* ── 모바일 탭바 ── */
+.mob-tabbar{
+  display:none;background:white;
+  border-bottom:1px solid var(--gray-200);
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+  flex-shrink:0;z-index:10;
+}
+.mob-tab{
+  flex:1;padding:12px 8px 11px;text-align:center;
+  font-size:.8rem;font-weight:700;color:var(--gray-500);
+  cursor:pointer;border-bottom:2.5px solid transparent;
+  margin-bottom:-1px;transition:all .18s;user-select:none;
+}
+.mob-tab .tab-icon{font-size:1rem;display:block;margin-bottom:2px}
+.mob-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.mob-badge{
+  display:inline-block;background:var(--blue);color:white;
+  font-size:.6rem;padding:1px 5px;border-radius:10px;
+  vertical-align:top;margin-left:2px;margin-top:-2px;
+}
+
+/* ── 콘텐츠 영역 ── */
+.content-area{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+
+/* ── 패널 트랙 ── */
+.panels-track{display:flex;flex:1;min-height:0;width:100%}
+
+/* ── 각 패널 ── */
+.panel{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+
+/* ── 패널1: 장비 ── */
+.panel-dev{background:white;border-right:1px solid var(--gray-200)}
+.dev-scroll{flex:1;overflow-y:auto;padding:8px}
+.step-lbl{
+  background:var(--gray-50);padding:10px 14px;
+  font-size:.68rem;font-weight:800;color:var(--gray-500);
+  text-transform:uppercase;letter-spacing:.07em;
+  border-bottom:1px solid var(--gray-200);flex-shrink:0;
+  display:flex;align-items:center;gap:6px;
+}
+.step-num{
+  background:var(--blue);color:white;
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.62rem;font-weight:800;flex-shrink:0;
+}
+/* 아코디언 */
+.acc-grp{margin-bottom:3px}
+.acc-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 11px;border-radius:8px;cursor:pointer;
+  font-size:.82rem;font-weight:700;color:var(--gray-700);
+  background:var(--gray-50);border:1.5px solid var(--gray-200);
+  transition:all .14s;user-select:none;
+}
+.acc-hdr:hover{background:var(--blue-lt);border-color:#bfdbfe;color:var(--blue)}
+.acc-hdr.open{background:var(--blue-lt);border-color:var(--blue-md);color:var(--blue)}
+.acc-arr{font-size:.65rem;transition:transform .2s;opacity:.6}
 .acc-hdr.open .acc-arr{transform:rotate(90deg)}
-.acc-body{display:none;padding:2px 0 2px 5px}
+.acc-body{display:none;padding:4px 0 4px 6px}
 .acc-body.show{display:block}
-.dev-card{padding:8px 9px;border-radius:5px;cursor:pointer;margin-bottom:2px;border:1.5px solid transparent;transition:all .12s;background:#fafbfc}
-.dev-card:hover{background:#eff6ff;border-color:#bfdbfe}
-.dev-card.active{background:#dbeafe;border-color:#3b82f6}
-.dev-card .dn{font-size:.78rem;font-weight:700;color:#1e293b}
-.dev-card .dm{font-size:.63rem;color:#64748b;margin-top:1px}
-.dev-card .dp{font-size:.7rem;color:#1d4ed8;font-weight:600;margin-top:2px}
-.dev-card .dd{font-size:.62rem;color:#7c3aed;margin-top:1px}
+/* 장비 카드 */
+.dev-card{
+  padding:11px 12px;border-radius:7px;cursor:pointer;
+  margin-bottom:3px;border:1.5px solid transparent;
+  transition:all .13s;background:var(--gray-50);
+}
+.dev-card:hover{background:var(--blue-lt);border-color:#bfdbfe}
+.dev-card.active{background:var(--blue-lt);border-color:var(--blue-md)}
+.dev-card .dn{font-size:.9rem;font-weight:700;color:var(--gray-900)}
+.dev-card .dm{font-size:.72rem;color:var(--gray-500);margin-top:2px}
+.dev-card .dp{font-size:.78rem;color:var(--blue);font-weight:700;margin-top:4px}
+.dev-card .dd{font-size:.68rem;color:var(--purple);margin-top:1px}
 
-/* ── 메인 ── */
-.main{flex:1;display:flex;overflow:hidden}
-.left-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.opt-scroll{flex:1;overflow-y:auto;padding:12px 14px;background:#eef2f7}
-.empty-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;height:55%;color:#94a3b8;text-align:center}
-.empty-msg .ei{font-size:2.5rem;margin-bottom:8px}
-.empty-msg h3{font-size:.85rem;color:#64748b}
-.dev-bar{background:white;border-radius:8px;padding:10px 13px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
-.dev-bar h2{font-size:.88rem;color:#0f2044;font-weight:800}
-.dev-bar .sub{font-size:.65rem;color:#64748b;margin-top:1px}
-.dev-bar .deliv{font-size:.65rem;color:#7c3aed;font-weight:600;margin-top:2px}
-.dev-bar .bp{font-size:.86rem;font-weight:800;color:#1e4d8c;white-space:nowrap}
-.dev-bar .bu{font-size:.62rem;color:#94a3b8}
-.opt-grp{background:white;border-radius:8px;padding:10px 13px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.grp-ttl{font-size:.72rem;font-weight:800;color:#334155;margin-bottom:7px;display:flex;align-items:center;gap:5px;padding-bottom:6px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap}
-.badge{font-size:.58rem;padding:1px 5px;border-radius:7px;font-weight:700}
-.b-note{background:#fef9c3;color:#713f12}
+/* ── 패널2: 옵션 ── */
+.panel-opt{flex:1;min-width:0;background:var(--gray-100)}
+.opt-inner{flex:1;overflow-y:auto;padding:14px 16px}
+.empty-msg{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:60%;color:var(--gray-300);text-align:center;gap:8px;
+}
+.empty-msg .ei{font-size:3rem}
+.empty-msg h3{font-size:.95rem;color:var(--gray-500);font-weight:600}
+.empty-msg p{font-size:.78rem;color:var(--gray-400,#94a3b8)}
+/* 장비 인포바 */
+.dev-bar{
+  background:white;border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:12px;
+  box-shadow:var(--shadow);
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:10px;flex-wrap:wrap;
+}
+.dev-bar h2{font-size:1rem;color:var(--blue);font-weight:800}
+.dev-bar .sub{font-size:.75rem;color:var(--gray-500);margin-top:2px}
+.dev-bar .deliv{font-size:.72rem;color:var(--purple);font-weight:600;margin-top:4px}
+.dev-bar .bp{font-size:.95rem;font-weight:800;color:var(--gray-900);white-space:nowrap}
+.dev-bar .bu{font-size:.65rem;color:var(--gray-500);margin-top:2px;text-align:right}
+/* 옵션 그룹 */
+.grp-step{
+  display:flex;align-items:center;gap:6px;margin-bottom:10px;
+  font-size:.7rem;font-weight:800;color:var(--blue);
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.opt-grp{
+  background:white;border-radius:var(--radius);
+  padding:14px 15px;margin-bottom:10px;
+  box-shadow:var(--shadow);
+}
+.grp-ttl{
+  font-size:.8rem;font-weight:800;color:var(--gray-700);
+  margin-bottom:10px;display:flex;align-items:center;
+  gap:6px;padding-bottom:8px;
+  border-bottom:1.5px solid var(--gray-100);flex-wrap:wrap;
+}
+.badge{font-size:.62rem;padding:2px 7px;border-radius:20px;font-weight:700}
+.b-note{background:#fef9c3;color:#92400e}
 .b-excl{background:#fee2e2;color:#991b1b}
-.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:5px}
-.chip{border:1.5px solid #e2e8f0;border-radius:6px;padding:8px 9px;cursor:pointer;transition:all .12s;background:#fafbfc}
-.chip:hover{border-color:#93c5fd;background:#eff6ff}
-.chip.sel{border-color:#3b82f6;background:#eff6ff}
-.chip.sel .cn{color:#1d4ed8}
-.chk{float:right;color:#3b82f6;font-size:.78rem;display:none}
-.chip.sel .chk{display:inline}
-.cn{font-size:.74rem;font-weight:600;color:#334155;margin-bottom:2px;padding-right:13px;line-height:1.3}
-.cu{font-size:.6rem;color:#94a3b8;margin-top:1px}
-.ck{font-size:.67rem;color:#64748b;font-weight:600}
-.neg{color:#16a34a!important}
+/* 옵션 칩 */
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:7px}
+.chip{
+  border:1.5px solid var(--gray-200);border-radius:8px;
+  padding:11px 12px;cursor:pointer;
+  transition:all .13s;background:var(--gray-50);
+  position:relative;
+}
+.chip:hover{border-color:#93c5fd;background:var(--blue-lt)}
+.chip.sel{border-color:var(--blue-md);background:var(--blue-lt)}
+.chip.sel::after{
+  content:'✓';position:absolute;top:8px;right:10px;
+  color:var(--blue);font-size:.85rem;font-weight:800;
+}
+.cn{font-size:.82rem;font-weight:600;color:var(--gray-700);margin-bottom:4px;padding-right:18px;line-height:1.35}
+.chip.sel .cn{color:var(--blue)}
+.ck{font-size:.75rem;font-weight:700;color:var(--gray-700)}
+.cu{font-size:.65rem;color:var(--gray-500);margin-top:2px}
+.neg{color:var(--green)!important}
 
-/* ── 요약 패널 ── */
-.summary-panel{width:210px;min-width:185px;background:white;border-left:1px solid #d1dae8;display:flex;flex-direction:column;overflow:hidden}
-.sum-scroll{flex:1;overflow-y:auto;padding:7px}
-.sum-empty{text-align:center;color:#94a3b8;font-size:.7rem;padding:18px 6px;line-height:1.5}
-.sum-section{margin-bottom:7px}
-.sum-hdr{font-size:.6rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;padding:3px 2px;border-bottom:1px solid #f1f5f9;margin-bottom:3px}
-.sum-item{display:flex;justify-content:space-between;align-items:flex-start;gap:3px;padding:4px 3px;border-radius:4px;background:#fafbfc;margin-bottom:2px}
-.sum-item:hover{background:#eff6ff}
-.sum-name{font-size:.66rem;color:#334155;font-weight:600;flex:1;line-height:1.3}
-.sum-pr{font-size:.62rem;color:#1e4d8c;font-weight:700;white-space:nowrap}
-.sum-del{cursor:pointer;font-size:.62rem;color:#94a3b8;padding:0 2px;flex-shrink:0}
-.sum-del:hover{color:#ef4444}
-.sum-dev{background:#dbeafe;border-radius:5px;padding:5px 7px;margin-bottom:5px}
-.sum-dev-name{font-size:.72rem;font-weight:800;color:#1e4d8c}
-.sum-dev-price{font-size:.65rem;color:#334155;margin-top:1px}
-.sum-dev-deliv{font-size:.62rem;color:#7c3aed;margin-top:1px}
-.sum-total{background:#f0f4fa;border-radius:5px;padding:6px 7px;margin-top:5px;font-size:.68rem;color:#334155}
-.st-row{display:flex;justify-content:space-between;margin-bottom:2px;gap:4px}
-.st-row:last-child{margin-bottom:0;font-weight:800;color:#0f2044;padding-top:4px;border-top:1px solid #d1dae8;margin-top:2px}
+/* ── 패널3: 요약 ── */
+.panel-sum{background:white;border-left:1px solid var(--gray-200)}
+.sum-inner{flex:1;overflow-y:auto;padding:10px}
+.sum-empty{text-align:center;color:var(--gray-300);font-size:.78rem;padding:24px 8px;line-height:1.7}
+.sum-dev{
+  background:linear-gradient(135deg,var(--blue-lt),#eff6ff);
+  border:1.5px solid #bfdbfe;border-radius:8px;
+  padding:10px 12px;margin-bottom:8px;
+}
+.sum-dev-name{font-size:.85rem;font-weight:800;color:var(--blue)}
+.sum-dev-price{font-size:.78rem;color:var(--gray-700);margin-top:2px;font-weight:600}
+.sum-dev-deliv{font-size:.7rem;color:var(--purple);margin-top:2px}
+.sum-sec-hdr{
+  font-size:.65rem;font-weight:800;color:var(--gray-500);
+  text-transform:uppercase;letter-spacing:.06em;
+  padding:4px 2px;border-bottom:1px solid var(--gray-200);margin-bottom:5px;
+}
+.sum-item{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:4px;padding:6px 4px;border-radius:5px;
+  background:var(--gray-50);margin-bottom:3px;
+}
+.sum-item:hover{background:var(--blue-lt)}
+.sum-name{font-size:.72rem;color:var(--gray-700);font-weight:600;flex:1;line-height:1.35}
+.sum-pr{font-size:.7rem;color:var(--blue);font-weight:700;white-space:nowrap}
+.sum-del{
+  cursor:pointer;font-size:.68rem;color:var(--gray-300);
+  padding:0 3px;flex-shrink:0;transition:color .13s;
+}
+.sum-del:hover{color:var(--red)}
+.sum-total{
+  background:var(--gray-50);border:1px solid var(--gray-200);
+  border-radius:8px;padding:10px 12px;margin-top:8px;
+}
+.st-row{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.74rem;color:var(--gray-700);padding:3px 0;gap:6px;
+}
+.st-row .lbl{font-weight:500;flex:1}
+.st-row .amt{font-weight:700;text-align:right}
+.st-divider{height:1px;background:var(--gray-200);margin:5px 0}
+.st-final{font-size:.82rem;font-weight:800;color:var(--gray-900)}
 
 /* ── 견적바 ── */
-.qbar{background:white;border-top:1px solid #d1dae8;padding:9px 14px;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
-.q-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
-.mf{display:flex;flex-direction:column;gap:2px;flex:1;min-width:85px}
-.mf label{font-size:.61rem;color:#64748b;font-weight:700}
-.mf input{border:1px solid #e2e8f0;border-radius:4px;padding:4px 6px;font-size:.74rem;color:#1e293b;font-family:inherit;outline:none;transition:border-color .13s}
-.mf input:focus{border-color:#3b82f6}
-.q-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.totals{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.titem{display:flex;flex-direction:column;gap:1px}
-.titem label{font-size:.59rem;color:#94a3b8;font-weight:600}
-.titem .val{font-size:.8rem;font-weight:800;color:#0f2044}
-.titem .val.accent{color:#1e4d8c}
-.titem .val.green{color:#15803d}
-.titem .val.red{color:#dc2626}
-.titem .val.sm{font-size:.7rem}
-.divider{width:1px;height:28px;background:#e2e8f0;flex-shrink:0}
-.btn-row{display:flex;gap:6px;flex-shrink:0}
-.btn{padding:7px 13px;border-radius:6px;border:none;cursor:pointer;font-size:.75rem;font-weight:700;transition:all .12s;font-family:inherit;white-space:nowrap}
-.btn-r{background:#f1f5f9;color:#475569}.btn-r:hover{background:#e2e8f0}
-.btn-e{background:linear-gradient(135deg,#1e4d8c,#2563eb);color:white;box-shadow:0 2px 8px rgba(30,77,140,.3)}
-.btn-e:hover{transform:translateY(-1px)}
+.qbar{
+  background:white;border-top:1px solid var(--gray-200);
+  padding:12px 16px;box-shadow:0 -3px 12px rgba(0,0,0,.08);
+  flex-shrink:0;
+}
+.qbar-step{
+  background:var(--gray-50);padding:6px 12px;
+  font-size:.65rem;font-weight:800;color:var(--gray-500);
+  text-transform:uppercase;letter-spacing:.06em;
+  border-bottom:1px solid var(--gray-200);
+  margin:-12px -16px 10px;
+  display:flex;align-items:center;gap:5px;
+}
+.q-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.mf{display:flex;flex-direction:column;gap:3px;flex:1;min-width:88px}
+.mf label{font-size:.65rem;color:var(--gray-500);font-weight:700;letter-spacing:.02em}
+.mf input{
+  border:1.5px solid var(--gray-200);border-radius:6px;
+  padding:6px 8px;font-size:.8rem;color:var(--gray-900);
+  font-family:inherit;outline:none;transition:border-color .13s;
+  background:white;
+}
+.mf input:focus{border-color:var(--blue-md)}
+.q-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.totals{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ti{display:flex;flex-direction:column;gap:2px}
+.ti .tl{font-size:.62rem;color:var(--gray-500);font-weight:600}
+.ti .tv{font-size:.86rem;font-weight:800;color:var(--gray-900)}
+.ti .tv.accent{color:var(--blue)}
+.ti .tv.green{color:var(--green)}
+.ti .tv.red{color:var(--red)}
+.ti .tv.sm{font-size:.74rem}
+.tdiv{width:1px;height:30px;background:var(--gray-200);flex-shrink:0}
+.btn-row{display:flex;gap:7px;flex-shrink:0}
+.btn{
+  padding:9px 16px;border-radius:8px;border:none;cursor:pointer;
+  font-size:.8rem;font-weight:700;transition:all .14s;
+  font-family:inherit;white-space:nowrap;
+}
+.btn-r{background:var(--gray-100);color:var(--gray-700)}
+.btn-r:hover{background:var(--gray-200)}
+.btn-e{
+  background:linear-gradient(135deg,var(--blue),#2563eb);
+  color:white;box-shadow:0 2px 10px rgba(30,77,140,.35);
+}
+.btn-e:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(30,77,140,.4)}
 .btn-e:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
 
-/* ── 모바일 탭 ── */
-.mob-tabs{display:none}
-
-.toast{position:fixed;bottom:14px;right:14px;background:#1e293b;color:white;padding:8px 14px;border-radius:7px;font-size:.75rem;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.3);transform:translateY(60px);opacity:0;transition:all .22s;z-index:999}
+/* ── 토스트 ── */
+.toast{
+  position:fixed;bottom:20px;right:20px;
+  background:#1e293b;color:white;padding:10px 16px;
+  border-radius:8px;font-size:.8rem;font-weight:500;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+  transform:translateY(60px);opacity:0;transition:all .25s;z-index:999;
+}
 .toast.show{transform:translateY(0);opacity:1}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
 
-/* ── 모바일 반응형 ── */
-@media (max-width:720px){
-  header{padding:10px 14px}
-  header h1{font-size:.88rem}
-  header .icon{font-size:1.3rem}
-  .layout{flex-direction:column;height:auto;min-height:0}
-  /* 모바일 탭 */
-  .mob-tabs{display:flex;background:white;border-bottom:2px solid #e2e8f0;flex-shrink:0}
-  .mob-tab{flex:1;padding:10px 4px;text-align:center;font-size:.72rem;font-weight:700;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;user-select:none}
-  .mob-tab.active{color:#1e4d8c;border-bottom-color:#1e4d8c}
-  /* 패널 숨기기/보이기 */
-  .sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid #e2e8f0;display:none}
-  .sidebar.mob-visible{display:flex;max-height:60vh}
-  .dev-scroll{max-height:calc(60vh - 38px)}
-  .main{flex-direction:column;height:auto}
-  .left-main{height:auto}
-  .opt-scroll{min-height:50vh;padding:10px 11px;display:none}
-  .opt-scroll.mob-visible{display:block}
-  .summary-panel{width:100%;border-left:none;border-top:1px solid #e2e8f0;display:none;max-height:60vh}
-  .summary-panel.mob-visible{display:flex}
+/* ── 스크롤바 ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:10px}
+
+/* ──────────────────────────────────
+   데스크톱 레이아웃
+────────────────────────────────── */
+@media(min-width:721px){
+  .mob-tabbar{display:none!important}
+  .panels-track{height:100%}
+  .panel-dev{width:230px;flex-shrink:0}
+  .panel-opt{flex:1}
+  .panel-sum{width:215px;flex-shrink:0}
+  .opt-inner{height:100%;overflow-y:auto}
+  .sum-inner{height:100%;overflow-y:auto}
+  .dev-scroll{height:100%;overflow-y:auto}
+}
+
+/* ──────────────────────────────────
+   모바일 레이아웃 (≤720px)
+────────────────────────────────── */
+@media(max-width:720px){
+  html,body{font-size:15px}
+  header{padding:11px 14px}
+  header h1{font-size:.97rem}
+  .mob-tabbar{display:flex}
+
+  /* 슬라이더 */
+  .panels-track{
+    width:300%;
+    transition:transform .32s cubic-bezier(.25,.46,.45,.94);
+    will-change:transform;
+    align-items:stretch;
+  }
+  .panel{width:33.3333%;height:100%;overflow:hidden;flex-shrink:0}
+  .panel-dev .dev-scroll{height:100%;overflow-y:auto}
+  .panel-opt .opt-inner{height:100%;overflow-y:auto;padding:12px 12px}
+  .panel-sum .sum-inner{height:100%;overflow-y:auto}
+
+  /* 카드/칩 터치 최적화 */
+  .dev-card{padding:13px 12px;margin-bottom:4px}
+  .dev-card .dn{font-size:1rem}
+  .dev-card .dm{font-size:.76rem}
+  .dev-card .dp{font-size:.84rem;margin-top:5px}
+  .dev-card .dd{font-size:.73rem}
+  .acc-hdr{padding:10px 12px;font-size:.88rem}
+
+  .opt-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .chip{padding:13px 11px}
+  .cn{font-size:.86rem;margin-bottom:5px}
+  .ck{font-size:.8rem}
+  .cu{font-size:.7rem}
+
+  .dev-bar{padding:12px 14px}
+  .dev-bar h2{font-size:1.05rem}
+  .dev-bar .sub{font-size:.78rem}
+  .dev-bar .deliv{font-size:.76rem}
+  .dev-bar .bp{font-size:1rem}
+  .grp-ttl{font-size:.84rem;padding-bottom:9px;margin-bottom:11px}
+
   /* 견적바 */
-  .qbar{position:sticky;bottom:0;z-index:10;padding:8px 11px}
-  .q-meta{gap:5px}
-  .mf{min-width:72px}
-  .mf label{font-size:.58rem}
-  .mf input{font-size:.7rem;padding:3px 5px}
-  .totals{gap:5px}
-  .titem label{font-size:.56rem}
-  .titem .val{font-size:.72rem}
-  .titem .val.sm{font-size:.64rem}
-  .divider{height:22px}
-  .btn{padding:6px 10px;font-size:.7rem}
-  /* 옵션 칩 */
-  .opt-grid{grid-template-columns:1fr 1fr}
-  .chip{padding:8px 8px}
-  .cn{font-size:.72rem}
-  .ck{font-size:.65rem}
-  .dev-bar h2{font-size:.84rem}
-  .grp-ttl{font-size:.7rem}
-  /* 장비 카드 */
-  .acc-hdr{font-size:.76rem;padding:8px 9px}
-  .dev-card .dn{font-size:.8rem}
-  .dev-card .dp{font-size:.72rem}
+  .qbar{padding:10px 13px}
+  .qbar-step{margin:-10px -13px 9px}
+  .q-meta{gap:6px}
+  .mf{min-width:78px}
+  .mf label{font-size:.62rem}
+  .mf input{font-size:.78rem;padding:5px 7px}
+  .totals{gap:7px}
+  .ti .tl{font-size:.6rem}
+  .ti .tv{font-size:.78rem}
+  .ti .tv.sm{font-size:.68rem}
+  .tdiv{height:24px}
+  .btn{padding:8px 12px;font-size:.78rem}
+
+  /* 요약 */
+  .sum-inner{padding:12px}
+  .sum-dev{padding:12px 13px}
+  .sum-dev-name{font-size:.92rem}
+  .st-row{font-size:.78rem}
+  .st-final{font-size:.88rem}
 }
 </style>
 </head>
 <body>
+
 <header>
-  <div class="icon" style="font-size:1.5rem">🔬</div>
+  <div style="font-size:1.6rem">🔬</div>
   <div>
     <h1>J.A. Woollam 엘립소미터 견적 시스템</h1>
-    <p>장비/옵션 선택 → 견적창 엑셀 자동 생성</p>
+    <p>장비/옵션 선택 → 견적창 엑셀 자동 생성 (DB 기준)</p>
   </div>
 </header>
 
-<!-- 모바일 탭 -->
-<div class="mob-tabs">
-  <div class="mob-tab active" onclick="mobTab('dev')">🔬 장비 선택</div>
-  <div class="mob-tab" onclick="mobTab('opt')">⚙️ 옵션</div>
-  <div class="mob-tab" onclick="mobTab('sum')">📋 요약</div>
+<!-- 모바일 탭바 -->
+<div class="mob-tabbar" id="mobTabbar">
+  <div class="mob-tab active" onclick="goTab(0)">
+    <span class="tab-icon">🔬</span>장비
+  </div>
+  <div class="mob-tab" onclick="goTab(1)">
+    <span class="tab-icon">⚙️</span>옵션
+  </div>
+  <div class="mob-tab" onclick="goTab(2)">
+    <span class="tab-icon">📋</span>요약<span class="mob-badge" id="selBadge" style="display:none">0</span>
+  </div>
 </div>
 
-<div class="layout">
-  <!-- 사이드바 -->
-  <div class="sidebar mob-visible" id="sidebar">
-    <div class="step-lbl"><div class="step-num">1</div>장비 선택</div>
-    <div class="dev-scroll" id="devList"></div>
-  </div>
-  <!-- 메인 -->
-  <div class="main">
-    <div class="left-main">
-      <div class="opt-scroll" id="optPanel">
-        <div class="empty-msg"><div class="ei">🔬</div><h3>장비를 선택하세요</h3></div>
-      </div>
-      <div class="qbar">
-        <div class="step-lbl" style="margin:-9px -14px 7px;border-radius:0"><div class="step-num">3</div>견적 정보</div>
-        <div class="q-meta">
-          <div class="mf"><label>회사명</label><input id="company" placeholder="(주)고객사명"></div>
-          <div class="mf"><label>담당자</label><input id="manager" placeholder="홍길동"></div>
-          <div class="mf"><label>납기일</label><input type="date" id="dueDate"></div>
-          <div class="mf"><label>기준환율</label><input id="fxRate" type="number" value="1550" min="1000" max="2500"></div>
-          <div class="mf"><label>환율리스크 (%)</label><input id="kRisk" type="number" value="5" min="0" max="30" step="0.1"></div>
-          <div class="mf"><label>할인율 (%)</label><input id="discRate" type="number" value="0" min="0" max="50" step="0.1"></div>
-        </div>
-        <div class="q-bottom">
-          <div class="totals">
-            <div class="titem"><label>견적가 (G열)</label><div class="val accent" id="tQuote">₩0</div></div>
-            <div class="divider"></div>
-            <div class="titem"><label>할인율</label><div class="val sm" id="tDisc">0%</div></div>
-            <div class="titem"><label>할인후 (L42)</label><div class="val accent" id="tDiscQuote">₩0</div></div>
-            <div class="divider"></div>
-            <div class="titem"><label>예상구매비 (L51)</label><div class="val sm" id="tINT">₩0</div></div>
-            <div class="titem"><label>예상마진 (L52)</label><div class="val green" id="tMargin">₩0</div></div>
-            <div class="titem"><label>마진율</label><div class="val sm" id="tMarginPct">0%</div></div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-r" onclick="resetAll()">초기화</button>
-            <button class="btn btn-e" id="exportBtn" onclick="exportExcel()" disabled>📥 엑셀</button>
-          </div>
+<div class="content-area">
+  <div class="panels-track" id="panelsTrack">
+
+    <!-- 패널1: 장비 선택 -->
+    <div class="panel panel-dev">
+      <div class="step-lbl"><div class="step-num">1</div>장비 선택</div>
+      <div class="dev-scroll" id="devList"></div>
+    </div>
+
+    <!-- 패널2: 옵션 -->
+    <div class="panel panel-opt">
+      <div class="opt-inner" id="optPanel">
+        <div class="empty-msg">
+          <div class="ei">🔬</div>
+          <h3>장비를 선택하세요</h3>
+          <p>왼쪽 장비 탭에서 선택하면<br>옵션이 여기 나타납니다</p>
         </div>
       </div>
     </div>
-    <!-- 요약 패널 -->
-    <div class="summary-panel" id="sumPanel">
+
+    <!-- 패널3: 요약 -->
+    <div class="panel panel-sum">
       <div class="step-lbl"><div class="step-num">✓</div>선택 요약</div>
-      <div class="sum-scroll" id="sumContent">
-        <div class="sum-empty">장비/옵션을 선택하면<br>여기에 표시됩니다</div>
+      <div class="sum-inner" id="sumContent">
+        <div class="sum-empty">장비/옵션을 선택하면<br>여기에 요약이 표시됩니다</div>
       </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 견적 정보 바 -->
+<div class="qbar">
+  <div class="qbar-step"><div class="step-num">3</div>견적 정보</div>
+  <div class="q-meta">
+    <div class="mf"><label>회사명</label><input id="company" placeholder="(주)고객사명"></div>
+    <div class="mf"><label>담당자</label><input id="manager" placeholder="홍길동"></div>
+    <div class="mf"><label>납기일</label><input type="date" id="dueDate"></div>
+    <div class="mf"><label>기준환율</label><input id="fxRate" type="number" value="1550" min="1000" max="2500"></div>
+    <div class="mf"><label>환율리스크 (%)</label><input id="kRisk" type="number" value="5" min="0" max="30" step="0.1"></div>
+    <div class="mf"><label>할인율 (%)</label><input id="discRate" type="number" value="0" min="0" max="50" step="0.1"></div>
+  </div>
+  <div class="q-bottom">
+    <div class="totals">
+      <div class="ti"><div class="tl">견적가 (G열)</div><div class="tv accent" id="tQuote">₩0</div></div>
+      <div class="tdiv"></div>
+      <div class="ti"><div class="tl">할인율</div><div class="tv sm" id="tDisc">0%</div></div>
+      <div class="ti"><div class="tl">할인후 (L42)</div><div class="tv accent" id="tDiscQuote">₩0</div></div>
+      <div class="tdiv"></div>
+      <div class="ti"><div class="tl">예상구매비 (L51)</div><div class="tv sm" id="tINT">₩0</div></div>
+      <div class="ti"><div class="tl">예상마진 (L52)</div><div class="tv green" id="tMargin">₩0</div></div>
+      <div class="ti"><div class="tl">마진율</div><div class="tv sm" id="tMarginPct">0%</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-r" onclick="resetAll()">초기화</button>
+      <button class="btn btn-e" id="exportBtn" onclick="exportExcel()" disabled>📥 견적창 엑셀</button>
     </div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -233,7 +445,6 @@ const TEMPLATE_B64="UEsDBBQABgAIAAAAIQBBbHEQHwIAADwQAAATAAgCW0NvbnRlbnRfVHlwZXNd
 
 const ROW_MAP={HEAD_HORZ:4,HEAD_VERT:5,HEAD_SMALL:6,HEAD_VASE:7,HEAD_INSITU:8,HEAD_OTHER:9,HEAD_OEM:10,M2K_IR:11,RC2_IR:12,VASE_RNG:13,TRANS1:14,TRANS2:15,TIP_M:16,TIP_C:17,CAMERA:18,PC:19,FOCUS:20,TABLE:21,OPT_H1:22,OPT_H2:23,OPT_H3:24,OPT_V1:25,OPT_V2:26,OPT_V3:27,OEM_OPT1:28,OEM_OPT2:29,OEM_OPT3:30,VASE_OPT1:31,VASE_OPT2:32,VASE_OPT3:33,IR_OPT1:34,IR_OPT2:35,IR_OPT3:36,VUV_OPT1:37,VUV_OPT2:38};
 
-// f=DB F열(견적창E, USD판매가), int=DB I열(INT Total USD)
 const GROUPS=[
   {id:"m2k_h",label:"M-2000 (Horizontal)",devs:[
     {id:"m2kv_h", name:"M-2000®V",    sub:"370–1000nm",slot:"HEAD_HORZ",dbName:" M-2000®V (HORIZONTAL BASE)",    f:182000,int:135850,deliv:210},
@@ -272,10 +483,10 @@ const GROUPS=[
     {id:"rc2d_i",name:"RC2®D IN SITU",sub:"193–1000nm",slot:"HEAD_INSITU",dbName:" RC2®D IN SITU",f:218000,int:163350,deliv:210},
   ]},
   {id:"vase",label:"VASE 계열",devs:[
-    {id:"vase",  name:"VASE with AutoRetarder®",sub:"240–2500nm",  slot:"HEAD_VASE",dbName:" VASE WITH AUTORETARDER®",f:231000,int:173250,deliv:210},
-    {id:"irvase",name:"IR-VASE® Mark II",       sub:"1.7–30μm",   slot:"HEAD_VASE",dbName:" IR-VASE® MARK II",       f:323000,int:242000,deliv:210},
-    {id:"vuv1",  name:"VUV-VASE® Gen-I",        sub:"146–1100nm", slot:"HEAD_VASE",dbName:" VUV-VASE® GEN-I",        f:404000,int:302500,deliv:210},
-    {id:"vuv2",  name:"VUV-VASE® Gen-II",       sub:"146–1100nm", slot:"HEAD_VASE",dbName:" VUV-VASE® GEN-II",       f:455000,int:341000,deliv:210},
+    {id:"vase",  name:"VASE w/ AutoRetarder®",sub:"240–2500nm",  slot:"HEAD_VASE",dbName:" VASE WITH AUTORETARDER®",f:231000,int:173250,deliv:210},
+    {id:"irvase",name:"IR-VASE® Mark II",      sub:"1.7–30μm",   slot:"HEAD_VASE",dbName:" IR-VASE® MARK II",       f:323000,int:242000,deliv:210},
+    {id:"vuv1",  name:"VUV-VASE® Gen-I",       sub:"146–1100nm", slot:"HEAD_VASE",dbName:" VUV-VASE® GEN-I",        f:404000,int:302500,deliv:210},
+    {id:"vuv2",  name:"VUV-VASE® Gen-II",      sub:"146–1100nm", slot:"HEAD_VASE",dbName:" VUV-VASE® GEN-II",       f:455000,int:341000,deliv:210},
   ]},
   {id:"etc",label:"기타 장비",devs:[
     {id:"alpha", name:"ALPHA 2.0",      sub:"400–1000nm 고정각",   slot:"HEAD_SMALL",dbName:" ALPHA 2.0",               f:80000, int:59400, deliv:150},
@@ -289,7 +500,7 @@ const GROUPS=[
 
 const OPTION_GROUPS=[
   {id:"m2k_ir",label:"M-2000 Range Upgrade",slot:"M2K_IR",forSeries:["M-2000"],multi:false,options:[
-    {id:"m2k_ir1",name:"IR Extension 1005–1690nm",dbName:"• IR Extension : 1005 nm to 1690 nm (adds 275 wavelengths).",f:29400,int:22000},
+    {id:"m2k_ir1",name:"IR Extension 1005–1690nm (+275wl)",dbName:"• IR Extension : 1005 nm to 1690 nm (adds 275 wavelengths).",f:29400,int:22000},
   ]},
   {id:"rc2_ir",label:"RC2 Range Upgrade",slot:"RC2_IR",forSeries:["RC2"],multi:false,options:[
     {id:"rc2_nir", name:"NIR Extension 1005–1690nm", dbName:"• NIR Extension : 1005 nm to 1690 nm (275 wavelengths)", f:29400,int:22000},
@@ -324,12 +535,12 @@ const OPTION_GROUPS=[
     {id:"fp_alt",name:"Alt Focused Spot 25×40μm (RC2 Small Spot용)", dbName:"• Alternate Focused Spot Size: 25x40um (for small spot RC2)",f:7400,int:5500},
   ]},
   {id:"table",label:"Table / Rack Mount",slot:"TABLE",note:"Head에 포함",forSeries:["M-2000","RC2","VASE","기타"],multi:false,options:[
-    {id:"tbl_r",  name:"Rack Mount Table (기본)",          dbName:"• Rack Mount Table",                                                                  f:11000, int:8250},
-    {id:"tbl_n",  name:"Without Table (차감)",             dbName:"• Without Table",                                                                     f:-11000,int:-8250},
-    {id:"tbl_3s", name:"Rack Mount + 3-Side Enclosure",    dbName:"• Rack Mount Table with 3-Side Enclosure",                                           f:14300, int:10725},
-    {id:"tbl_ml", name:"Large Mapping Table (no lock)",    dbName:"• Large Mapping Table/Enclosure with Access Door without door lock & light tree",    f:19800, int:14850},
-    {id:"tbl_mll",name:"Large Mapping Table (+ lock)",     dbName:"• Large Mapping Table/Enclosure with Access Door with door lock & light tree",       f:35200, int:26400},
-    {id:"tbl_act",name:"Active Isolation Table",           dbName:"• Active Isolation Table with mounts",                                               f:14900, int:11162},
+    {id:"tbl_r",  name:"Rack Mount Table (기본)",       dbName:"• Rack Mount Table",                                                                 f:11000, int:8250},
+    {id:"tbl_n",  name:"Without Table (차감)",          dbName:"• Without Table",                                                                    f:-11000,int:-8250},
+    {id:"tbl_3s", name:"Rack Mount + 3-Side Enclosure", dbName:"• Rack Mount Table with 3-Side Enclosure",                                          f:14300, int:10725},
+    {id:"tbl_ml", name:"Large Mapping Table (no lock)", dbName:"• Large Mapping Table/Enclosure with Access Door without door lock & light tree",   f:19800, int:14850},
+    {id:"tbl_mll",name:"Large Mapping Table (+ lock)",  dbName:"• Large Mapping Table/Enclosure with Access Door with door lock & light tree",      f:35200, int:26400},
+    {id:"tbl_act",name:"Active Isolation Table",        dbName:"• Active Isolation Table with mounts",                                              f:14900, int:11162},
   ]},
   {id:"pc",label:"Operating PC",slot:"PC",forSeries:["M-2000","RC2","VASE","기타","INSITU","SMALL_SE"],multi:false,options:[
     {id:"pc1",name:"Operating PC",dbName:"• Operating PC",f:1400,int:1000},
@@ -346,7 +557,7 @@ const OPTION_GROUPS=[
     {id:"oh_500ul",name:"500μL Horizontal Liquid Cell",dbName:"• 500 μL Horizontal Liquid Cell",                f:5900,  int:4400},
     {id:"oh_ec",   name:"2mL Electrochemical Cell",    dbName:"• 2 mL Electrochemical Cell",                    f:8800,  int:6600},
     {id:"oh_heat", name:"5mL Heated Liquid Cell",      dbName:"• 5 mL Heated Liquid Cell",                      f:14700, int:11000},
-    {id:"oh_vt",   name:"500μL Var. Temp Liquid Cell", dbName:"• 500 μL Variable Temperature Liquid Cell",      f:29400, int:22000},
+    {id:"oh_vt",   name:"500μL Var. Temp Cell",        dbName:"• 500 μL Variable Temperature Liquid Cell",      f:29400, int:22000},
     {id:"oh_env",  name:"Environment Cell",            dbName:"• Environment Cell",                              f:58700, int:44000},
     {id:"oh_envc", name:"Environment Cell (챔버만)",    dbName:"• Environment Cell chamber only",                f:8800,  int:6600},
     {id:"oh_qcm",  name:"QCM-Compatible Stage",        dbName:"• QCM-Compatible Mounting Stage",                f:3300,  int:2475},
@@ -377,18 +588,18 @@ const OPTION_GROUPS=[
     {id:"ov_afw",  name:"Automated Filter Wheel",     dbName:"• Automated Filter Wheel",                       f:3700,  int:2750},
   ]},
   {id:"vase_opt",label:"VASE 옵션",slots:["VASE_OPT1","VASE_OPT2","VASE_OPT3"],forSeries:["VASE(V)"],multi:true,options:[
-    {id:"vo_m50",  name:"Manual XY 50×50mm",          dbName:"• Manual 50 mm by 50 mm XY",                   f:7400,  int:5500},
-    {id:"vo_a50",  name:"Auto XY 50×50mm",            dbName:"• Automated 50 mm by 50 mm XY",                f:17600, int:13200},
-    {id:"vo_rot",  name:"Sample Rotation",            dbName:"• Sample Rotation",                             f:17600, int:13200},
-    {id:"vo_z",    name:"Auto Z-Translation",         dbName:"• Automated Z-Translation",                     f:11000, int:8250},
-    {id:"vo_t300", name:"Temp: Linkam HFSEL300",      dbName:"• Basic Temperature Stage (Linkam HFSEL300)",   f:26400, int:19800},
-    {id:"vo_t600", name:"Temp: Linkam HFSEL600",      dbName:"• Standard Temperature Stage (Linkam HFSEL600)",f:35200, int:26400},
-    {id:"vo_cs",   name:"Cryostat Std (4.2/77–500K)", dbName:"• Cryostat Standard (4.2/77 - 500 Kelvin)",    f:120300,int:90200},
-    {id:"vo_co",   name:"Cryostat Opt (4.2/77–800K)", dbName:"• Cryostat Optional (4.2/77 - 800 Kelvin)",    f:124700,int:93500},
-    {id:"vo_pmp",  name:"Rotary Vane Pump",           dbName:"• Rotary Vane Exhaust Pump",                    f:7400,  int:5500},
-    {id:"vo_f1",   name:"Focusing 1st set",           dbName:"• Std or Alt Focusing:  1st set",               f:6600,  int:4950},
-    {id:"vo_f2",   name:"Focusing 2nd set",           dbName:"• Std or Alt Focusing:  2nd set",               f:3200,  int:2400},
-    {id:"vo_lmd",  name:"Prism Cell LMD Kit",         dbName:"• Prism Cell LMD Kit",                          f:18400, int:13750},
+    {id:"vo_m50", name:"Manual XY 50×50mm",           dbName:"• Manual 50 mm by 50 mm XY",                   f:7400,  int:5500},
+    {id:"vo_a50", name:"Auto XY 50×50mm",             dbName:"• Automated 50 mm by 50 mm XY",                f:17600, int:13200},
+    {id:"vo_rot", name:"Sample Rotation",             dbName:"• Sample Rotation",                             f:17600, int:13200},
+    {id:"vo_z",   name:"Auto Z-Translation",          dbName:"• Automated Z-Translation",                     f:11000, int:8250},
+    {id:"vo_t300",name:"Temp: Linkam HFSEL300",       dbName:"• Basic Temperature Stage (Linkam HFSEL300)",   f:26400, int:19800},
+    {id:"vo_t600",name:"Temp: Linkam HFSEL600",       dbName:"• Standard Temperature Stage (Linkam HFSEL600)",f:35200, int:26400},
+    {id:"vo_cs",  name:"Cryostat Std (4.2/77–500K)",  dbName:"• Cryostat Standard (4.2/77 - 500 Kelvin)",    f:120300,int:90200},
+    {id:"vo_co",  name:"Cryostat Opt (4.2/77–800K)",  dbName:"• Cryostat Optional (4.2/77 - 800 Kelvin)",    f:124700,int:93500},
+    {id:"vo_pmp", name:"Rotary Vane Pump",            dbName:"• Rotary Vane Exhaust Pump",                    f:7400,  int:5500},
+    {id:"vo_f1",  name:"Focusing 1st set",            dbName:"• Std or Alt Focusing:  1st set",               f:6600,  int:4950},
+    {id:"vo_f2",  name:"Focusing 2nd set",            dbName:"• Std or Alt Focusing:  2nd set",               f:3200,  int:2400},
+    {id:"vo_lmd", name:"Prism Cell LMD Kit",          dbName:"• Prism Cell LMD Kit",                          f:18400, int:13750},
   ]},
   {id:"ir_opt",label:"IR-VASE 옵션",slots:["IR_OPT1","IR_OPT2","IR_OPT3"],forSeries:["VASE(IR)"],multi:true,options:[
     {id:"ir_t",    name:"Manual Translation",         dbName:"• Manual Sample Translation",                   f:7400,  int:5500},
@@ -402,19 +613,18 @@ const OPTION_GROUPS=[
     {id:"ir_pmp",  name:"Rotary Vane Pump",           dbName:"• Rotary Vane Exhaust Pump",                    f:7400,  int:5500},
   ]},
   {id:"vuv_opt",label:"VUV-VASE Gen-II 옵션",slots:["VUV_OPT1","VUV_OPT2"],forSeries:["VASE(VUV)"],multi:true,options:[
-    {id:"vuv_xnir",name:"XNIR 1100–2500nm",           dbName:"• XNIR Spectral Range Extension :1100 nm to 2500 nm",f:14700,int:11000},
+    {id:"vuv_xnir",name:"XNIR 1100–2500nm",          dbName:"• XNIR Spectral Range Extension :1100 nm to 2500 nm",f:14700,int:11000},
     {id:"vuv_140", name:"Auto 140×140mm XY",          dbName:"• Automated Sample Translation140 mm by 140 mm XY",  f:29400,int:22000},
-    {id:"vuv_r300",name:"Auto 300mm R-theta",          dbName:"• Automated Sample Translation 300 mm R-theta",      f:52800,int:39600},
-    {id:"vuv_lmd", name:"Prism Cell LMD",              dbName:"• Prism Cell LMD",                                   f:7400, int:5500},
-    {id:"vuv_cs",  name:"Cryostat Std (4.2/77–500K)",  dbName:"• Cryostat Standard (4.2/77 - 500 Kelvin)",         f:139400,int:104500},
-    {id:"vuv_co",  name:"Cryostat Opt (4.2/77–800K)",  dbName:"• Cryostat Optional (4.2/77 - 800 Kelvin)",         f:143800,int:107800},
-    {id:"vuv_pmp", name:"Rotary Vane Pump",             dbName:"• Rotary Vane Exhaust Pump",                        f:7400, int:5500},
+    {id:"vuv_r300",name:"Auto 300mm R-theta",         dbName:"• Automated Sample Translation 300 mm R-theta",      f:52800,int:39600},
+    {id:"vuv_lmd", name:"Prism Cell LMD",             dbName:"• Prism Cell LMD",                                   f:7400, int:5500},
+    {id:"vuv_cs",  name:"Cryostat Std (4.2/77–500K)", dbName:"• Cryostat Standard (4.2/77 - 500 Kelvin)",         f:139400,int:104500},
+    {id:"vuv_co",  name:"Cryostat Opt (4.2/77–800K)", dbName:"• Cryostat Optional (4.2/77 - 800 Kelvin)",         f:143800,int:107800},
+    {id:"vuv_pmp", name:"Rotary Vane Pump",           dbName:"• Rotary Vane Exhaust Pump",                        f:7400, int:5500},
   ]},
 ];
 
 const ALL_DEVS=GROUPS.flatMap(g=>g.devs);
 function getDevById(id){return ALL_DEVS.find(d=>d.id===id);}
-
 function getSeriesTags(dev){
   const id=dev.id,s=dev.slot,t=[];
   if(id.startsWith("m2k"))t.push("M-2000");
@@ -432,59 +642,37 @@ function getSeriesTags(dev){
 }
 function getOptGroups(dev){const tags=getSeriesTags(dev);return OPTION_GROUPS.filter(g=>g.forSeries.some(s=>tags.includes(s)));}
 
-// ── G열 수식 재현 ──
-// calcG: f(DB F열) × 환율 → 내자견적가
-// K_SUM = 환율리스크(adjustable) + 은행이자0.02 + 운임0.02 + 통관0.002 + 마진0.02 + 부대0
+// G열/L52 계산
 const GK20=0.015,GN20=0.4,GO20=300,GK21=0.01226,GL22=100000;
 function rup(n,d){const f=Math.pow(10,-d);return Math.ceil(n/f)*f;}
 function getFX(){return parseFloat(document.getElementById("fxRate").value)||1550;}
 function getDisc(){return (parseFloat(document.getElementById("discRate").value)||0)/100;}
 function getKRisk(){return (parseFloat(document.getElementById("kRisk").value)||5)/100;}
-function getKSum(){return getKRisk()+0.02+0.02+0.002+0.02+0;}  // K14~K19
-
+function getKSum(){return getKRisk()+0.02+0.02+0.002+0.02+0;}
 function calcG(fv){
   const fx=getFX(),k=getKSum(),e=fv*fx;
   return rup(rup(e,-5)+e*k+rup(e*GN20*GK20/365*GO20,-5)+rup(e*GK21/365*GO20,-5)+GL22,-6);
 }
-
-// ── L52 정확 수식 재현 ──
-// L11 = ROUNDUP(SUM(L4),-5) = ROUNDUP(E42,-5) = ROUNDUP(E39*D1,-5) = ROUNDUP(totalF*fx,-5)
-// L16 = L11*K16 = L11*0.02
-// L46 = L16
-// L47 = L45*0.002
-// L48 = L45*0.01226
-// L49 = L45*N49*K49/365*O49 - 5  (literal -5, 수식 그대로)
-// L50 = 100000
-// L51 = SUM(L45:L50)
-// L52 = L42 - L51
-function calcL52(totalG, totalF, totalINT){
+function calcL52(totalG,totalF,totalINT){
   const fx=getFX(),disc=getDisc();
-  const L23=totalG;
-  const L40=disc;  // 네고율
-  const L41=Math.round(L23*L40);
-  const L42=L23-L41;
-  const M44=totalINT;
-  const L45=M44*0.85*fx;
+  const L23=totalG,L40=disc,L41=Math.round(L23*L40),L42=L23-L41;
+  const L45=totalINT*0.85*fx;
   const L11=rup(totalF*fx,-5);
   const L46=L11*0.02;
-  const L47=L45*0.002;
-  const L48=L45*0.01226;
-  const L49=L45*GN20*GK20/365*GO20-5;  // 수식 그대로 -5
-  const L50=GL22;
-  const L51=L45+L46+L47+L48+L49+L50;
-  return {L42,L45,L46,L51,L52:L42-L51};
+  const L47=L45*0.002,L48=L45*0.01226;
+  const L49=L45*GN20*GK20/365*GO20-5;
+  const L51=L45+L46+L47+L48+L49+GL22;
+  return{L42,L45,L46,L51,L52:L42-L51};
 }
-
 function fmtW(n){const neg=n<0;return(neg?"−":"")+"₩"+Math.abs(Math.round(n)).toLocaleString("ko-KR");}
 function fmtWS(n){const neg=n<0;return(neg?"−":"+")+"₩"+Math.abs(Math.round(n)).toLocaleString("ko-KR");}
 
 // STATE
 let curDev=null,selMap={};
 
-// ── SIDEBAR ──
+// ── 장비 목록 ──
 function renderDevList(){
-  const el=document.getElementById("devList");
-  let h="";
+  const el=document.getElementById("devList");let h="";
   GROUPS.forEach(g=>{
     const isOpen=curDev&&g.devs.some(d=>d.id===curDev.id);
     h+=`<div class="acc-grp">
@@ -493,10 +681,11 @@ function renderDevList(){
       </div>
       <div class="acc-body${isOpen?" show":""}" id="acc-${g.id}">`;
     g.devs.forEach(d=>{
+      const gv=calcG(d.f);
       h+=`<div class="dev-card${curDev?.id===d.id?" active":""}" onclick="selectDev('${d.id}')">
         <div class="dn">${d.name}</div>
         <div class="dm">${d.sub}</div>
-        <div class="dp">${fmtW(calcG(d.f))} ~</div>
+        <div class="dp">${fmtW(gv)} ~</div>
         <div class="dd">📦 납기 ${d.deliv}일</div>
       </div>`;
     });
@@ -513,41 +702,40 @@ function toggleGrp(gid,hdr){
 
 // ── 장비 선택 ──
 function selectDev(id){
-  curDev=getDevById(id);
-  selMap={};
+  curDev=getDevById(id);selMap={};
   getOptGroups(curDev).forEach(g=>{selMap[g.id]=new Set();});
   renderDevList();renderOptions();renderSummary();updateBottom();
-  // 모바일: 옵션 탭으로 이동
-  if(window.innerWidth<=720) mobTab('opt');
+  if(isMobile())goTab(1);
 }
 
 // ── 옵션 렌더 ──
 function renderOptions(){
   const panel=document.getElementById("optPanel");
-  if(!curDev){panel.innerHTML='<div class="empty-msg"><div class="ei">🔬</div><h3>장비를 선택하세요</h3></div>';return;}
+  if(!curDev){
+    panel.innerHTML='<div class="empty-msg"><div class="ei">🔬</div><h3>장비를 선택하세요</h3><p>장비 탭에서 선택하면<br>옵션이 여기 나타납니다</p></div>';
+    return;
+  }
   let h=`<div class="dev-bar">
     <div>
       <h2>🔬 ${curDev.name}</h2>
       <div class="sub">${curDev.sub}</div>
       <div class="deliv">📦 납기 ${curDev.deliv}일 (약 ${Math.round(curDev.deliv/30)}개월)</div>
     </div>
-    <div style="text-align:right">
+    <div>
       <div class="bp">${fmtW(calcG(curDev.f))}</div>
-      <div class="bu">G열 기준 · INT USD ${curDev.int.toLocaleString()}</div>
+      <div class="bu">G열 기준 · INT ${curDev.int.toLocaleString()}</div>
     </div>
   </div>
-  <div class="step-lbl" style="border-radius:7px;margin-bottom:8px"><div class="step-num">2</div>옵션 선택</div>`;
-
+  <div class="grp-step"><div class="step-num">2</div>옵션 선택</div>`;
   getOptGroups(curDev).forEach(g=>{
     if(!selMap[g.id])selMap[g.id]=new Set();
     const nb=g.note?`<span class="badge b-note">${g.note}</span>`:"";
-    const mb=`<span class="badge b-excl">${g.multi?"복수":"단일"}</span>`;
+    const mb=`<span class="badge b-excl">${g.multi?"복수 선택":"단일 선택"}</span>`;
     h+=`<div class="opt-grp"><div class="grp-ttl">📦 ${g.label} ${nb} ${mb}</div><div class="opt-grid">`;
     g.options.forEach(opt=>{
       const sel=selMap[g.id]?.has(opt.id),neg=opt.f<0;
       const kv=calcG(Math.abs(opt.f))*(neg?-1:1);
       h+=`<div class="chip${sel?" sel":""}" onclick="toggleOpt('${g.id}','${opt.id}',${!!g.multi},${g.maxSel||999})">
-        <span class="chk">✓</span>
         <div class="cn">${opt.name}</div>
         <div class="${neg?"ck neg":"ck"}">${fmtWS(kv)}</div>
         <div class="cu">F: ${Math.abs(opt.f).toLocaleString()}</div>
@@ -568,31 +756,29 @@ function toggleOpt(gid,oid,multi,maxSel){
   renderOptions();renderSummary();updateBottom();
 }
 
-// ── 합계 계산 ──
+// ── 합산 ──
 function calcTotals(){
-  if(!curDev)return{totalG:0,totalF:0,totalINT:0};
-  let totalG=calcG(curDev.f),totalF=curDev.f,totalINT=curDev.int;
+  if(!curDev)return{totalG:0,totalF:0,totalINT:0,optCount:0};
+  let totalG=calcG(curDev.f),totalF=curDev.f,totalINT=curDev.int,optCount=0;
   getOptGroups(curDev).forEach(g=>{
     g.options.forEach(o=>{
       if(selMap[g.id]?.has(o.id)){
         const neg=o.f<0;
         totalG+=calcG(Math.abs(o.f))*(neg?-1:1);
-        totalF+=o.f;
-        totalINT+=o.int;
+        totalF+=o.f;totalINT+=o.int;optCount++;
       }
     });
   });
-  return{totalG,totalF,totalINT};
+  return{totalG,totalF,totalINT,optCount};
 }
 
-// ── 요약 패널 ──
+// ── 요약 ──
 function renderSummary(){
   const el=document.getElementById("sumContent");
-  if(!curDev){el.innerHTML='<div class="sum-empty">장비/옵션을 선택하면<br>여기에 표시됩니다</div>';return;}
-  const{totalG,totalF,totalINT}=calcTotals();
+  if(!curDev){el.innerHTML='<div class="sum-empty">장비/옵션을 선택하면<br>여기에 요약이 표시됩니다</div>';return;}
+  const{totalG,totalF,totalINT,optCount}=calcTotals();
   const{L42,L45,L46,L51,L52}=calcL52(totalG,totalF,totalINT);
-  const disc=getDisc();
-  const marginPct=L42>0?L52/L42*100:0;
+  const disc=getDisc(),mpct=L42>0?L52/L42*100:0;
   let optItems=[];
   getOptGroups(curDev).forEach(g=>{
     g.options.forEach(o=>{
@@ -602,76 +788,76 @@ function renderSummary(){
       }
     });
   });
+  // badge 업데이트
+  const badge=document.getElementById("selBadge");
+  badge.style.display=optCount>0?"inline-block":"none";
+  badge.textContent=optCount;
 
   let h=`<div class="sum-dev">
     <div class="sum-dev-name">🔬 ${curDev.name}</div>
     <div class="sum-dev-price">${fmtW(calcG(curDev.f))}</div>
     <div class="sum-dev-deliv">📦 납기 ${curDev.deliv}일</div>
   </div>`;
-
   if(optItems.length>0){
-    h+=`<div class="sum-section"><div class="sum-hdr">선택 옵션 (${optItems.length}개)</div>`;
+    h+=`<div class="sum-sec-hdr">선택 옵션 (${optItems.length}개)</div>`;
     optItems.forEach(it=>{
       h+=`<div class="sum-item">
         <div class="sum-name">${it.name}</div>
-        <div style="display:flex;align-items:center;gap:2px">
+        <div style="display:flex;align-items:center;gap:3px;flex-shrink:0">
           <div class="sum-pr">${fmtWS(it.price)}</div>
           <div class="sum-del" onclick="removeOpt('${it.gid}','${it.oid}')">✕</div>
         </div>
       </div>`;
     });
-    h+=`</div>`;
   }else{
-    h+=`<div style="font-size:.66rem;color:#94a3b8;padding:5px 2px">선택된 옵션 없음</div>`;
+    h+=`<div style="font-size:.72rem;color:#94a3b8;padding:6px 2px">선택된 옵션 없음</div>`;
   }
-
   h+=`<div class="sum-total">
-    <div class="st-row"><span>견적가 (G열)</span><span>${fmtW(totalG)}</span></div>
-    <div class="st-row"><span>할인율</span><span>${(disc*100).toFixed(1)}%</span></div>
-    <div class="st-row"><span>할인후 (L42)</span><span>${fmtW(L42)}</span></div>
-    <div class="st-row"><span>Wiz 구매가 (L45)</span><span>${fmtW(L45)}</span></div>
-    <div class="st-row"><span>운송비 (L46)</span><span>${fmtW(L46)}</span></div>
-    <div class="st-row"><span>예상구매비 (L51)</span><span>${fmtW(L51)}</span></div>
-    <div class="st-row"><span>예상마진 (L52)</span><span style="color:${L52>=0?"#15803d":"#dc2626"}">${fmtW(L52)} (${marginPct.toFixed(1)}%)</span></div>
+    <div class="st-row"><span class="lbl">견적가 (G열)</span><span class="amt">${fmtW(totalG)}</span></div>
+    <div class="st-row"><span class="lbl">할인율</span><span class="amt">${(disc*100).toFixed(1)}%</span></div>
+    <div class="st-row"><span class="lbl">할인후 견적가 (L42)</span><span class="amt">${fmtW(L42)}</span></div>
+    <div class="st-divider"></div>
+    <div class="st-row"><span class="lbl">Wiz 구매가 (L45)</span><span class="amt">${fmtW(L45)}</span></div>
+    <div class="st-row"><span class="lbl">운송비 (L46)</span><span class="amt">${fmtW(L46)}</span></div>
+    <div class="st-row"><span class="lbl">예상구매비 (L51)</span><span class="amt">${fmtW(L51)}</span></div>
+    <div class="st-divider"></div>
+    <div class="st-row st-final">
+      <span class="lbl">예상마진 (L52)</span>
+      <span class="amt" style="color:${L52>=0?"#15803d":"#dc2626"}">${fmtW(L52)}<br><small style="font-size:.7rem;font-weight:500">(${mpct.toFixed(1)}%)</small></span>
+    </div>
   </div>`;
   el.innerHTML=h;
 }
 
 function removeOpt(gid,oid){selMap[gid]?.delete(oid);renderOptions();renderSummary();updateBottom();}
 
-// ── 하단 바 업데이트 ──
+// ── 하단 바 ──
 function updateBottom(){
   if(!curDev){
-    document.getElementById("tQuote").textContent="₩0";
-    document.getElementById("tDiscQuote").textContent="₩0";
-    document.getElementById("tINT").textContent="₩0";
-    document.getElementById("tMargin").textContent="₩0";
-    document.getElementById("tMarginPct").textContent="0%";
-    document.getElementById("tDisc").textContent="0%";
+    ["tQuote","tDiscQuote","tINT","tMargin","tMarginPct","tDisc"].forEach(id=>{
+      document.getElementById(id).textContent=id==="tDisc"?"0%":"₩0";
+    });
     document.getElementById("exportBtn").disabled=true;
+    const badge=document.getElementById("selBadge");badge.style.display="none";
     return;
   }
   const{totalG,totalF,totalINT}=calcTotals();
   const{L42,L51,L52}=calcL52(totalG,totalF,totalINT);
-  const disc=getDisc();
-  const pct=L42>0?L52/L42*100:0;
+  const disc=getDisc(),pct=L42>0?L52/L42*100:0;
   document.getElementById("tQuote").textContent=fmtW(totalG);
   document.getElementById("tDisc").textContent=(disc*100).toFixed(1)+"%";
   document.getElementById("tDiscQuote").textContent=fmtW(L42);
   document.getElementById("tINT").textContent=fmtW(L51);
   const mel=document.getElementById("tMargin");
-  mel.textContent=fmtW(L52);
-  mel.className="val"+(L52>=0?" green":" red");
+  mel.textContent=fmtW(L52);mel.className="tv"+(L52>=0?" green":" red");
   document.getElementById("tMarginPct").textContent=pct.toFixed(1)+"%";
   document.getElementById("exportBtn").disabled=false;
 }
 
-// ── EXPORT ──
+// ── 엑셀 내보내기 ──
 function exportExcel(){
   if(!curDev)return;
-  const bin=atob(TEMPLATE_B64);
-  const ab=new ArrayBuffer(bin.length);
-  const ua=new Uint8Array(ab);
+  const bin=atob(TEMPLATE_B64),ab=new ArrayBuffer(bin.length),ua=new Uint8Array(ab);
   for(let i=0;i<bin.length;i++)ua[i]=bin.charCodeAt(i);
   const wb=XLSX.read(ab,{type:"array",cellFormula:true,cellStyles:true});
   const ws=wb.Sheets["견적창"];
@@ -679,8 +865,7 @@ function exportExcel(){
   for(let r=4;r<=38;r++)ws[`D${r}`]={t:"s",v:""};
   ws[`D${ROW_MAP[curDev.slot]}`]={t:"s",v:curDev.dbName.trim()};
   getOptGroups(curDev).forEach(g=>{
-    const selIds=Array.from(selMap[g.id]||[]);
-    if(!selIds.length)return;
+    const selIds=Array.from(selMap[g.id]||[]);if(!selIds.length)return;
     if(g.id==="camera_tab"){
       selIds.forEach(oid=>{const opt=g.options.find(o=>o.id===oid);if(opt?.slot)ws[`D${ROW_MAP[opt.slot]}`]={t:"s",v:opt.dbName};});
     }else if(g.slots){
@@ -696,22 +881,50 @@ function exportExcel(){
   const blob=new Blob([out],{type:"application/octet-stream"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-  a.href=url;
-  a.download=`견적창_${curDev.name.replace(/[®™]/g,"")}_${company}_${today.replace(/\./g,"")}.xlsx`;
+  a.href=url;a.download=`견적창_${curDev.name.replace(/[®™]/g,"")}_${company}_${today.replace(/\./g,"")}.xlsx`;
   a.click();URL.revokeObjectURL(url);
   showToast("✅ 견적창 엑셀 다운로드 완료!");
 }
 
-// ── 모바일 탭 ──
-function mobTab(tab){
-  if(window.innerWidth>720)return;
-  document.querySelectorAll(".mob-tab").forEach((t,i)=>{
-    t.classList.toggle("active",["dev","opt","sum"][i]===tab);
-  });
-  document.getElementById("sidebar").classList.toggle("mob-visible",tab==="dev");
-  document.getElementById("optPanel").classList.toggle("mob-visible",tab==="opt");
-  document.getElementById("sumPanel").classList.toggle("mob-visible",tab==="sum");
+// ── 모바일 탭/스와이프 ──
+let currentTab=0,touchSX=0,touchSY=0,swiping=false,dragging=false;
+function isMobile(){return window.innerWidth<=720;}
+
+function goTab(n){
+  currentTab=Math.max(0,Math.min(2,n));
+  if(isMobile()){
+    document.getElementById("panelsTrack").style.transform=`translateX(-${currentTab*33.3333}%)`;
+  }
+  document.querySelectorAll(".mob-tab").forEach((t,i)=>t.classList.toggle("active",i===currentTab));
 }
+
+const track=document.getElementById("panelsTrack");
+track.addEventListener("touchstart",e=>{
+  touchSX=e.touches[0].clientX;
+  touchSY=e.touches[0].clientY;
+  swiping=false;dragging=false;
+},{passive:true});
+
+track.addEventListener("touchmove",e=>{
+  if(!isMobile())return;
+  const dx=e.touches[0].clientX-touchSX;
+  const dy=e.touches[0].clientY-touchSY;
+  if(!dragging){
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>8){dragging=true;swiping=true;}
+    else if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>8){dragging=true;swiping=false;}
+  }
+  if(swiping)e.preventDefault();
+},{passive:false});
+
+track.addEventListener("touchend",e=>{
+  if(!isMobile()||!swiping)return;
+  const dx=touchSX-e.changedTouches[0].clientX;
+  if(Math.abs(dx)>55){
+    if(dx>0&&currentTab<2)goTab(currentTab+1);
+    else if(dx<0&&currentTab>0)goTab(currentTab-1);
+  }
+  swiping=false;dragging=false;
+},{passive:true});
 
 function resetAll(){
   curDev=null;selMap={};
@@ -720,7 +933,9 @@ function resetAll(){
   document.getElementById("fxRate").value=1550;
   document.getElementById("kRisk").value=5;
   document.getElementById("discRate").value=0;
+  goTab(0);
 }
+
 function showToast(msg){
   const t=document.getElementById("toast");
   t.textContent=msg;t.classList.add("show");
@@ -730,6 +945,7 @@ function showToast(msg){
 ["fxRate","kRisk","discRate"].forEach(id=>{
   document.getElementById(id).addEventListener("input",()=>{renderDevList();renderOptions();renderSummary();updateBottom();});
 });
+
 renderDevList();updateBottom();
 </script>
 </body>
